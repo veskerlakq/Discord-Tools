@@ -1,7 +1,7 @@
 import os
 import sqlite3
 
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect
 from flask_login import (
     LoginManager, UserMixin,
     login_user, login_required,
@@ -10,15 +10,12 @@ from flask_login import (
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = "saas_2_0_secret"
 
-# ================= CONFIG =================
-app.secret_key = os.environ.get("SECRET_KEY", "dev_key_123")
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB = os.path.join(BASE_DIR, "app.db")
+DB = "app.db"
 
 
-# ================= DB =================
+# ---------------- DB ----------------
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -27,7 +24,6 @@ def db():
 
 def init_db():
     conn = db()
-
     conn.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +32,6 @@ def init_db():
         plan TEXT DEFAULT 'free'
     )
     """)
-
     conn.commit()
     conn.close()
 
@@ -44,7 +39,7 @@ def init_db():
 init_db()
 
 
-# ================= LOGIN =================
+# ---------------- AUTH ----------------
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -68,13 +63,13 @@ def load_user(user_id):
     return None
 
 
-# ================= ROUTES =================
+# ---------------- ROUTES ----------------
 
 @app.route("/")
 def home():
     if current_user.is_authenticated:
         return redirect("/dashboard")
-    return redirect("/login")
+    return render_template("home.html")
 
 
 @app.route("/dashboard")
@@ -83,7 +78,7 @@ def dashboard():
     return render_template("dashboard.html")
 
 
-# ================= AUTH =================
+# ---------------- LOGIN ----------------
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -107,6 +102,8 @@ def login():
     return render_template("login.html")
 
 
+# ---------------- REGISTER ----------------
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
@@ -128,14 +125,16 @@ def register():
     return render_template("register.html")
 
 
+# ---------------- LOGOUT ----------------
+
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    session.clear()
-    return redirect("/login")
+    return redirect("/")
 
 
-# ================= RUN =================
+# ---------------- RUN ----------------
+
 if __name__ == "__main__":
     app.run(debug=True)
