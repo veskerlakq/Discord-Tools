@@ -1,5 +1,12 @@
 from flask import Flask, render_template, request, redirect, session
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    login_required,
+    logout_user,
+    current_user
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import sqlite3
@@ -13,16 +20,14 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# FIX: Render-safe DB path
+# FIXED DB PATH (Render safe)
 DB = os.path.join(BASE_DIR, "app.db")
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-
-# ---------------- GLOBAL ERROR CATCH ----------------
+# ---------------- GLOBAL ERROR ----------------
 @app.errorhandler(Exception)
 def handle_error(e):
     print("🔥 GLOBAL ERROR:")
@@ -89,7 +94,6 @@ def load_user(user_id):
 
     if u:
         return User(u["id"], u["username"], u["plan"])
-
     return None
 
 
@@ -121,7 +125,7 @@ def templates():
     return render_template("templates.html", templates=rows)
 
 
-# ---------------- CREATE TEMPLATE (FIXED 100%) ----------------
+# ---------------- CREATE TEMPLATE ----------------
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
@@ -142,11 +146,9 @@ def create_template():
 
             if file and file.filename:
                 filename = secure_filename(file.filename)
-                save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                save_path = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(save_path)
                 image_path = "/static/uploads/" + filename
-
-            author = getattr(current_user, "username", "unknown")
 
             conn = db()
             conn.execute("""
@@ -157,16 +159,16 @@ def create_template():
                 desc,
                 image_path,
                 link,
-                author
+                current_user.username
             ))
             conn.commit()
             conn.close()
 
             return redirect("/templates")
 
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc())
-            return f"CREATE ERROR: {str(e)}", 500
+            return "CREATE TEMPLATE ERROR (check logs)", 500
 
     return render_template("create-template.html")
 
