@@ -1,45 +1,57 @@
-{% extends "base.html" %}
+@app.route("/create-template", methods=["GET", "POST"])
+@login_required
+def create_template():
 
-{% block content %}
+    if request.method == "POST":
 
-<div class="card p-6">
+        try:
+            print("=== FORM ===", dict(request.form))
+            print("=== FILES ===", request.files)
 
-    <h2 class="text-xl font-bold mb-4">Create Template</h2>
+            name = request.form.get("name")
+            desc = request.form.get("desc")
+            link = request.form.get("link")
 
-    <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-3">
+            file = request.files.get("image")
 
-        <input 
-            name="name" 
-            placeholder="Name" 
-            class="p-2 rounded text-black"
-            required
-        >
+            print("NAME:", name)
+            print("FILE:", file)
 
-        <input 
-            name="desc" 
-            placeholder="Description" 
-            class="p-2 rounded text-black"
-        >
+            image_path = ""
 
-        <input 
-            type="file" 
-            name="image" 
-            class="p-2 bg-white text-black rounded"
-            accept="image/*"
-        >
+            if file:
+                print("FILENAME:", file.filename)
 
-        <input 
-            name="link" 
-            placeholder="Template Link" 
-            class="p-2 rounded text-black"
-        >
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
-        <button class="btn blue">
-            Create Template
-        </button>
+                print("SAVE PATH:", save_path)
 
-    </form>
+                file.save(save_path)
+                image_path = "/static/uploads/" + filename
 
-</div>
+            conn = db()
 
-{% endblock %}
+            conn.execute("""
+                INSERT INTO templates (name, description, image, link, author)
+                VALUES (?,?,?,?,?)
+            """, (
+                name,
+                desc,
+                image_path,
+                link,
+                current_user.username
+            ))
+
+            conn.commit()
+            conn.close()
+
+            return redirect("/templates")
+
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return f"ERROR: {str(e)}", 500
+
+    return render_template("create-template.html")
