@@ -2,62 +2,11 @@
 
 {% block content %}
 
-<div class="card p-6 mb-6">
+<div class="card p-6">
 
-    <div class="text-2xl font-bold flex items-center gap-2">
-        <i class="fa-solid fa-chart-line text-green-400"></i>
-        Dashboard
-    </div>
+    <h1>Dashboard</h1>
 
-    <div class="text-gray-400 mt-2">
-        Welcome, {{ current_user.username if current_user.is_authenticated else "Guest" }}
-    </div>
-
-</div>
-
-<div class="grid grid-cols-2 gap-6">
-
-    <!-- BOT GENERATOR -->
-    <div class="card p-6">
-
-        <div class="flex items-center gap-3 text-xl font-bold">
-            <i class="fa-solid fa-robot text-blue-400"></i>
-            Bot Generator
-        </div>
-
-        <p class="text-gray-400 mt-2">
-            Create and configure Discord bot instantly
-        </p>
-
-        {% if current_user.is_authenticated and current_user.plan == "premium" %}
-        <a href="/bot-generator" class="btn blue mt-4">
-            Open Generator
-        </a>
-        {% else %}
-        <div class="text-gray-400 mt-4">
-            🔒 Premium required
-        </div>
-        {% endif %}
-
-    </div>
-
-    <!-- TEMPLATES -->
-    <div class="card p-6">
-
-        <div class="flex items-center gap-3 text-xl font-bold">
-            <i class="fa-solid fa-layer-group text-purple-400"></i>
-            Templates
-        </div>
-
-        <p class="text-gray-400 mt-2">
-            Explore server templates
-        </p>
-
-        <a href="/templates" class="btn blue mt-4">
-            Open Marketplace
-        </a>
-
-    </div>
+    <p>Welcome, {{ current_user.username }}</p>
 
 </div>
 
