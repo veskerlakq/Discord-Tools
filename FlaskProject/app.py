@@ -79,6 +79,24 @@ def load_user(user_id):
     return None
 
 
+# ---------------- ROUTES ----------------
+@app.route("/")
+def home():
+    return redirect("/login")
+
+
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    return render_template("dashboard.html")
+
+
+@app.route("/toggle-theme")
+def toggle_theme():
+    session["theme"] = "light" if session.get("theme", "dark") == "dark" else "dark"
+    return redirect(request.referrer or "/dashboard")
+
+
 # ---------------- TEMPLATES ----------------
 @app.route("/templates")
 @login_required
@@ -90,7 +108,6 @@ def templates():
     return render_template("templates.html", templates=rows)
 
 
-# ---------------- CREATE TEMPLATE (UPLOAD FIX) ----------------
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
@@ -128,4 +145,71 @@ def create_template():
 
         return redirect("/templates")
 
-    return render_template("create_template.html")
+    return render_template("create-template.html")
+
+
+@app.route("/use-template/<int:template_id>")
+@login_required
+def use_template(template_id):
+
+    conn = db()
+    tpl = conn.execute(
+        "SELECT * FROM templates WHERE id=?",
+        (template_id,)
+    ).fetchone()
+    conn.close()
+
+    if not tpl:
+        return "Template not found", 404
+
+    tpl = dict(tpl)
+
+    return render_template("use_template.html", tpl=tpl)
+
+
+# ---------------- AUTH ----------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        conn = db()
+        user = conn.execute(
+            "SELECT * FROM users WHERE username=?",
+            (request.form.get("username"),)
+        ).fetchone()
+        conn.close()
+
+        if user and check_password_hash(user["password"], request.form.get("password")):
+            login_user(User(user["id"], user["username"], user["plan"]))
+            return redirect("/dashboard")
+
+    return render_template("login.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        conn = db()
+        conn.execute(
+            "INSERT INTO users (username, password) VALUES (?,?)",
+            (
+                request.form.get("username"),
+                generate_password_hash(request.form.get("password"))
+            )
+        )
+        conn.commit()
+        conn.close()
+        return redirect("/login")
+
+    return render_template("register.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    session.clear()
+    return redirect("/login")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
