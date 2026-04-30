@@ -123,7 +123,7 @@ bg-[#0b1220] text-white
 
     <div class="font-bold text-xl flex items-center gap-2">
         <i class="fa-solid fa-cube text-blue-400"></i>
-        My SaaS
+        Discord Tools
     </div>
 
     <div class="flex items-center gap-4">
@@ -153,13 +153,11 @@ bg-[#0b1220] text-white
 
         <div class="flex items-center gap-3 ml-4">
 
-            <!-- USERNAME LEFT -->
             <span class="text-gray-300">
                 <i class="fa-solid fa-user"></i>
                 {{ current_user.username }}
             </span>
 
-            <!-- PREMIUM -->
             {% if current_user.plan == "premium" %}
                 <div class="btn yellow">
                     <i class="fa-solid fa-crown"></i>
@@ -172,7 +170,6 @@ bg-[#0b1220] text-white
                 </a>
             {% endif %}
 
-            <!-- LOGOUT -->
             <a href="/logout" class="btn red">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
@@ -186,9 +183,34 @@ bg-[#0b1220] text-white
 </div>
 
 <!-- CONTENT -->
-<div class="p-6">
+<div class="p-6 min-h-screen">
     {% block content %}{% endblock %}
 </div>
+
+<!-- FOOTER -->
+<footer class="mt-10 border-t border-white/10 p-6 text-center text-sm text-gray-400">
+
+    <div class="max-w-3xl mx-auto space-y-4">
+
+        <div>
+            <strong>Политика конфиденциальности / Privacy Policy</strong><br>
+            RU: Мы не продаём и не передаём ваши данные третьим лицам. Используя сайт, вы соглашаетесь на обработку данных для работы сервиса.<br>
+            EN: We do not sell or share your data with third parties. By using this site, you agree to data processing for service operation.
+        </div>
+
+        <div>
+            <strong>Условия использования / Terms of Use</strong><br>
+            RU: Пользователь обязуется не использовать сервис в незаконных целях и соблюдать законы своей страны.<br>
+            EN: The user agrees not to use the service for illegal purposes and to comply with applicable laws.
+        </div>
+
+        <div class="text-xs opacity-60 mt-4">
+            © 2026 Discord Tools. All rights reserved.
+        </div>
+
+    </div>
+
+</footer>
 
 </body>
 </html>
