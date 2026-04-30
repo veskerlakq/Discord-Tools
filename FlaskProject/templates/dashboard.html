@@ -6,22 +6,23 @@
 
     <div class="text-2xl font-bold flex items-center gap-2">
         <i class="fa-solid fa-chart-line text-green-400"></i>
-        {{ t.dashboard }}
+        Dashboard
     </div>
 
     <div class="text-gray-400 mt-2">
-        {{ t.welcome }}, {{ current_user.username if current_user.is_authenticated else "Guest" }}
+        Welcome, {{ current_user.username if current_user.is_authenticated else "Guest" }}
     </div>
 
 </div>
 
 <div class="grid grid-cols-2 gap-6">
 
+    <!-- BOT GENERATOR -->
     <div class="card p-6">
 
         <div class="flex items-center gap-3 text-xl font-bold">
             <i class="fa-solid fa-robot text-blue-400"></i>
-            {{ t.bot }}
+            Bot Generator
         </div>
 
         <p class="text-gray-400 mt-2">
@@ -33,16 +34,19 @@
             Open Generator
         </a>
         {% else %}
-        <div class="text-gray-400 mt-4">🔒 Premium required</div>
+        <div class="text-gray-400 mt-4">
+            🔒 Premium required
+        </div>
         {% endif %}
 
     </div>
 
+    <!-- TEMPLATES -->
     <div class="card p-6">
 
         <div class="flex items-center gap-3 text-xl font-bold">
             <i class="fa-solid fa-layer-group text-purple-400"></i>
-            {{ t.templates }}
+            Templates
         </div>
 
         <p class="text-gray-400 mt-2">
