@@ -1,25 +1,26 @@
 import os
 import sqlite3
-import traceback
+import zipfile
+from werkzeug.utils import secure_filename
 
-from flask import Flask, render_template, request, redirect, session
-from flask_login import (
-    LoginManager, UserMixin,
-    login_user, login_required,
-    logout_user, current_user
-)
+from flask import Flask, render_template, request, redirect, session, send_file
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-
-# ================= CONFIG =================
-app.secret_key = os.environ.get("SECRET_KEY", "saas_ultra_key_999")
+app.secret_key = "ULTRA_SECRET_500_FIX"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "app.db")
 
+UPLOAD = os.path.join(BASE_DIR, "static/uploads")
+GEN = os.path.join(BASE_DIR, "generated")
 
-# ================= DB =================
+os.makedirs(UPLOAD, exist_ok=True)
+os.makedirs(GEN, exist_ok=True)
+
+
+# ---------- DB ----------
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -56,7 +57,7 @@ def init_db():
 init_db()
 
 
-# ================= AUTH =================
+# ---------- AUTH ----------
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -71,29 +72,17 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    try:
-        conn = db()
-        u = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
-        conn.close()
-        if u:
-            return User(u["id"], u["username"], u["plan"])
-    except:
-        return None
+    conn = db()
+    u = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+    conn.close()
+    if u:
+        return User(u["id"], u["username"], u["plan"])
 
 
-# ================= ERROR SAFETY =================
-@app.errorhandler(Exception)
-def error(e):
-    print(traceback.format_exc())
-    return f"ERROR: {e}", 500
-
-
-# ================= ROUTES =================
+# ---------- ROUTES ----------
 
 @app.route("/")
 def home():
-    if current_user.is_authenticated:
-        return redirect("/dashboard")
     return render_template("home.html")
 
 
@@ -103,14 +92,10 @@ def dashboard():
     return render_template("dashboard.html")
 
 
-# ================= AUTH =================
+# ---------- AUTH ----------
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
-    if current_user.is_authenticated:
-        return redirect("/dashboard")
-
     if request.method == "POST":
         conn = db()
         user = conn.execute(
@@ -128,15 +113,11 @@ def login():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-
     if request.method == "POST":
         conn = db()
         conn.execute(
             "INSERT INTO users (username, password) VALUES (?,?)",
-            (
-                request.form["username"],
-                generate_password_hash(request.form["password"])
-            )
+            (request.form["username"], generate_password_hash(request.form["password"]))
         )
         conn.commit()
         conn.close()
@@ -153,31 +134,41 @@ def logout():
     return redirect("/")
 
 
-# ================= TEMPLATES =================
+# ---------- TEMPLATES ----------
 
 @app.route("/templates")
 @login_required
 def templates():
     conn = db()
-    rows = conn.execute("SELECT * FROM templates ORDER BY id DESC").fetchall()
+    data = conn.execute("SELECT * FROM templates").fetchall()
     conn.close()
-    return render_template("templates.html", templates=rows)
+    return render_template("templates.html", templates=data)
 
 
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
-
     if request.method == "POST":
-        name = request.form["name"]
-        desc = request.form["desc"]
-        link = request.form["link"]
+        file = request.files.get("image")
+
+        img = ""
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            path = os.path.join(UPLOAD, filename)
+            file.save(path)
+            img = "/static/uploads/" + filename
 
         conn = db()
         conn.execute("""
-            INSERT INTO templates (name, description, image, link, author)
-            VALUES (?,?,?,?,?)
-        """, (name, desc, "", link, current_user.username))
+        INSERT INTO templates (name, description, image, link, author)
+        VALUES (?,?,?,?,?)
+        """, (
+            request.form["name"],
+            request.form["desc"],
+            img,
+            request.form["link"],
+            current_user.username
+        ))
         conn.commit()
         conn.close()
 
@@ -186,20 +177,55 @@ def create_template():
     return render_template("create_template.html")
 
 
-@app.route("/use-template/<int:template_id>")
+@app.route("/use-template/<int:id>")
 @login_required
-def use_template(template_id):
-
+def use_template(id):
     conn = db()
-    tpl = conn.execute("SELECT * FROM templates WHERE id=?", (template_id,)).fetchone()
+    tpl = conn.execute("SELECT * FROM templates WHERE id=?", (id,)).fetchone()
     conn.close()
-
-    if not tpl:
-        return "Not found", 404
-
     return render_template("use_template.html", tpl=tpl)
 
 
-# ================= RUN =================
+# ---------- BOT GENERATOR ----------
+
+@app.route("/bot-generator", methods=["GET", "POST"])
+@login_required
+def bot_generator():
+
+    if request.method == "POST":
+        name = request.form["name"]
+        prefix = request.form["prefix"]
+
+        code = f"""
+import discord
+from discord.ext import commands
+
+bot = commands.Bot(command_prefix="{prefix}")
+
+@bot.event
+async def on_ready():
+    print("{name} ready")
+
+@bot.command()
+async def ping(ctx):
+    await ctx.send("pong")
+
+bot.run("TOKEN")
+"""
+
+        path = os.path.join(GEN, f"{name}.py")
+        with open(path, "w") as f:
+            f.write(code)
+
+        zip_path = os.path.join(GEN, f"{name}.zip")
+        with zipfile.ZipFile(zip_path, "w") as z:
+            z.write(path, arcname=f"{name}.py")
+
+        return send_file(zip_path, as_attachment=True)
+
+    return render_template("bot_generator.html")
+
+
+# ---------- RUN ----------
 if __name__ == "__main__":
     app.run(debug=True)
