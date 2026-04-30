@@ -6,34 +6,19 @@
 
     <h2 class="text-xl font-bold mb-4">Create Template</h2>
 
-    <form method="POST" class="flex flex-col gap-3">
+    <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-3">
 
-        <input
-            name="name"
-            placeholder="Name"
-            class="p-2 rounded text-black"
-        >
+        <input name="name" placeholder="Name" class="p-2 rounded text-black">
 
-        <input
-            name="desc"
-            placeholder="Description"
-            class="p-2 rounded text-black"
-        >
+        <input name="desc" placeholder="Description" class="p-2 rounded text-black">
 
-        <input
-            name="image"
-            placeholder="Image URL (optional)"
-            class="p-2 rounded text-black"
-        >
+        <!-- 🔥 FILE UPLOAD -->
+        <input type="file" name="image" class="p-2 bg-white text-black rounded">
 
-        <input
-            name="link"
-            placeholder="Template Link"
-            class="p-2 rounded text-black"
-        >
+        <input name="link" placeholder="Template Link" class="p-2 rounded text-black">
 
         <button class="btn blue">
-            Create Template
+            Upload Template
         </button>
 
     </form>
