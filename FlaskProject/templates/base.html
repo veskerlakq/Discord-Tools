@@ -14,19 +14,11 @@ body {
     color: white;
 }
 
-.card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 16px;
-}
-
 .btn {
     padding: 10px 14px;
-    border-radius: 12px;
+    border-radius: 10px;
     display: inline-flex;
     gap: 8px;
-    cursor: pointer;
     text-decoration: none;
     transition: 0.2s;
 }
@@ -38,6 +30,13 @@ body {
 .btn:hover {
     transform: scale(1.05);
     filter: brightness(1.2);
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px;
 }
 
 .topbar {
@@ -54,9 +53,7 @@ body {
 
 <div class="topbar">
 
-    <div style="font-weight:bold;">
-        Discord Tools
-    </div>
+    <div class="font-bold">Discord Tools</div>
 
     <div>
 
