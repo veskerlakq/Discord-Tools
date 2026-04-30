@@ -138,3 +138,11 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+import traceback
+
+@app.errorhandler(Exception)
+def error_handler(e):
+    print("\n🔥 FULL ERROR TRACEBACK:")
+    print(traceback.format_exc())
+    return f"ERROR: {e}", 500
