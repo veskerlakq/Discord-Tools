@@ -2,12 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background: #0b1220;
+    color: white;
+}
+
+.card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.btn {
+    padding: 10px 14px;
+    border-radius: 12px;
+    display: inline-flex;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn.blue { background:#2563eb; color:white; }
+
+.btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+</style>
+
 </head>
 
-<body class="bg-[#0b1220] text-white flex items-center justify-center min-h-screen">
+<body>
 
+<div style="min-height:100vh; display:flex; justify-content:center; align-items:center;">
     {% block content %}{% endblock %}
+</div>
 
 </body>
 </html>
