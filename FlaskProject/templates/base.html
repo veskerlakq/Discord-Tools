@@ -2,35 +2,40 @@
 <html>
 <head>
 <meta charset="UTF-8">
-
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body { margin:0; font-family:sans-serif; background:#0b1220; color:white; }
+body { background:#050816; color:white; margin:0; }
 
 .sidebar {
-    width:220px;
+    width:230px;
     height:100vh;
     position:fixed;
-    left:0;
-    top:0;
-    background:#0a0f1a;
+    background:#0b1220;
     padding:20px;
 }
 
-.main {
-    margin-left:240px;
-    padding:20px;
-}
+.main { margin-left:250px; padding:20px; }
 
 .card {
     background:rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.08);
     border-radius:14px;
     padding:16px;
 }
-</style>
 
+.btn {
+    padding:10px;
+    border-radius:10px;
+    background:#2563eb;
+    display:inline-block;
+    transition:0.2s;
+}
+
+.btn:hover {
+    transform:scale(1.05);
+    box-shadow:0 0 15px #3b82f6;
+}
+</style>
 </head>
 
 <body>
@@ -38,25 +43,24 @@ body { margin:0; font-family:sans-serif; background:#0b1220; color:white; }
 {% if current_user.is_authenticated %}
 
 <div class="sidebar">
-    <h2>SaaS 3.1</h2>
+<h2>SaaS 5.0</h2>
 
-    <a href="/dashboard">Dashboard</a><br>
-    <a href="/templates">Templates</a><br>
-    <a href="/create-template">Create</a><br><br>
+<a href="/dashboard">Dashboard</a><br>
+<a href="/templates">Templates</a><br>
+<a href="/bot-generator">Bot Generator</a><br>
+<a href="/create-template">Create</a><br><br>
 
-    <a href="/logout">Logout</a>
+<a href="/logout">Logout</a>
 </div>
 
 <div class="main">
-    {% block content %}{% endblock %}
+{% block content %}{% endblock %}
 </div>
 
 {% else %}
-
 <div class="main">
-    {% block content %}{% endblock %}
+{% block content %}{% endblock %}
 </div>
-
 {% endif %}
 
 </body>
