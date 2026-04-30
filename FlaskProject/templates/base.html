@@ -8,28 +8,52 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-body { font-family: sans-serif; }
+body {
+    font-family: sans-serif;
+}
 
+/* CARD */
 .card {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
 }
 
+/* BUTTON */
 .btn {
     padding: 10px 14px;
     border-radius: 12px;
     display: inline-flex;
+    align-items: center;
     gap: 8px;
     text-decoration: none;
-    transition: 0.2s;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
 }
 
+/* COLORS */
 .btn.blue { background:#2563eb; color:white; }
 .btn.red { background:#dc2626; color:white; }
 .btn.yellow { background:#f59e0b; color:black; }
 
-.btn:hover { transform: scale(1.05); }
+/* HOVER FIX (ВОТ ЭТО ТЕБЕ НЕ РАБОТАЛО) */
+.btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    filter: brightness(1.25);
+}
+
+/* GLOW */
+.btn.blue:hover {
+    box-shadow: 0 0 15px rgba(37,99,235,0.8);
+}
+.btn.red:hover {
+    box-shadow: 0 0 15px rgba(220,38,38,0.8);
+}
+.btn.yellow:hover {
+    box-shadow: 0 0 15px rgba(245,158,11,0.8);
+}
+
 </style>
 
 </head>
@@ -45,32 +69,31 @@ body { font-family: sans-serif; }
 
     <div class="flex items-center gap-4">
 
-        <!-- USER SAFE BLOCK -->
-{% if current_user.is_authenticated %}
+        {% if current_user.is_authenticated %}
 
-<div class="flex items-center gap-3">
+        <div class="flex items-center gap-3">
 
-    <span>
-        <i class="fa-solid fa-user"></i>
-        {{ current_user.username }}
-    </span>
+            <span>
+                <i class="fa-solid fa-user"></i>
+                {{ current_user.username }}
+            </span>
 
-    {% if current_user.plan is defined and current_user.plan == "premium" %}
-        <div class="btn yellow">Premium</div>
-    {% endif %}
+            {% if current_user.plan == "premium" %}
+                <div class="btn yellow">Premium</div>
+            {% endif %}
 
-    <a href="/logout" class="btn red">Logout</a>
+            <a href="/logout" class="btn red">Logout</a>
 
-</div>
+        </div>
 
-{% else %}
+        {% else %}
 
-<div class="flex gap-2">
-    <a href="/login" class="btn blue">Login</a>
-    <a href="/register" class="btn yellow">Sign up</a>
-</div>
+        <div class="flex gap-2">
+            <a href="/login" class="btn blue">Login</a>
+            <a href="/register" class="btn yellow">Sign up</a>
+        </div>
 
-{% endif %}
+        {% endif %}
 
     </div>
 </div>
