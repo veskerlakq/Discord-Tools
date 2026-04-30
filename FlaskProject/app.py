@@ -1,16 +1,10 @@
 from flask import Flask, render_template, request, redirect, session
-from flask_login import (
-    LoginManager,
-    UserMixin,
-    login_user,
-    login_required,
-    logout_user,
-    current_user
-)
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import sqlite3
 import os
+import traceback
 
 app = Flask(__name__)
 
@@ -18,12 +12,22 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# FIX: Render-safe DB path
 DB = os.path.join(BASE_DIR, "app.db")
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+
+# ---------------- GLOBAL ERROR CATCH ----------------
+@app.errorhandler(Exception)
+def handle_error(e):
+    print("🔥 GLOBAL ERROR:")
+    print(traceback.format_exc())
+    return f"SERVER ERROR: {str(e)}", 500
 
 
 # ---------------- DB ----------------
@@ -79,22 +83,14 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    try:
-        conn = db()
-        user = conn.execute(
-            "SELECT * FROM users WHERE id=?",
-            (user_id,)
-        ).fetchone()
-        conn.close()
+    conn = db()
+    u = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+    conn.close()
 
-        if user:
-            return User(user["id"], user["username"], user["plan"])
+    if u:
+        return User(u["id"], u["username"], u["plan"])
 
-        return None
-
-    except Exception as e:
-        print("USER LOAD ERROR:", e)
-        return None
+    return None
 
 
 # ---------------- ROUTES ----------------
@@ -122,11 +118,10 @@ def templates():
     conn = db()
     rows = conn.execute("SELECT * FROM templates").fetchall()
     conn.close()
-
     return render_template("templates.html", templates=rows)
 
 
-# ---------------- CREATE TEMPLATE (FIXED) ----------------
+# ---------------- CREATE TEMPLATE (FIXED 100%) ----------------
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
@@ -139,18 +134,19 @@ def create_template():
             link = request.form.get("link", "").strip()
 
             if not name:
-                return "Name is required", 400
+                return "Name required", 400
 
             file = request.files.get("image")
 
             image_path = ""
 
-            # safe upload
             if file and file.filename:
                 filename = secure_filename(file.filename)
                 save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                 file.save(save_path)
                 image_path = "/static/uploads/" + filename
+
+            author = getattr(current_user, "username", "unknown")
 
             conn = db()
             conn.execute("""
@@ -161,7 +157,7 @@ def create_template():
                 desc,
                 image_path,
                 link,
-                current_user.username
+                author
             ))
             conn.commit()
             conn.close()
@@ -169,12 +165,13 @@ def create_template():
             return redirect("/templates")
 
         except Exception as e:
-            return f"CREATE TEMPLATE ERROR: {str(e)}", 500
+            print(traceback.format_exc())
+            return f"CREATE ERROR: {str(e)}", 500
 
     return render_template("create-template.html")
 
 
-# ---------------- VIEW TEMPLATE ----------------
+# ---------------- USE TEMPLATE ----------------
 @app.route("/use-template/<int:template_id>")
 @login_required
 def use_template(template_id):
@@ -187,7 +184,7 @@ def use_template(template_id):
     conn.close()
 
     if not tpl:
-        return "Template not found", 404
+        return "Not found", 404
 
     return render_template("use_template.html", tpl=tpl)
 
