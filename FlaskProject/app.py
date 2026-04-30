@@ -3,18 +3,16 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
-import zipfile
 
 app = Flask(__name__)
 
-# ================= CONFIG =================
 app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "app.db")
 
 
-# ================= DB =================
+# ---------------- DB ----------------
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -38,7 +36,8 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         description TEXT,
-        data TEXT,
+        image TEXT,
+        link TEXT,
         author TEXT
     )
     """)
@@ -51,7 +50,7 @@ with app.app_context():
     init_db()
 
 
-# ================= LOGIN =================
+# ---------------- LOGIN ----------------
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -74,7 +73,7 @@ def load_user(user_id):
     return None
 
 
-# ================= GLOBALS (FIX t CRASH) =================
+# ---------------- GLOBAL UI TEXT ----------------
 @app.context_processor
 def inject_globals():
     return dict(
@@ -87,7 +86,7 @@ def inject_globals():
     )
 
 
-# ================= ROUTES =================
+# ---------------- ROUTES ----------------
 @app.route("/")
 def home():
     return redirect("/login")
@@ -111,7 +110,7 @@ def toggle_lang():
     return redirect(request.referrer or "/dashboard")
 
 
-# ================= MARKETPLACE =================
+# ---------------- TEMPLATES MARKET ----------------
 @app.route("/templates")
 @login_required
 def templates():
@@ -119,29 +118,28 @@ def templates():
     rows = conn.execute("SELECT * FROM templates").fetchall()
     conn.close()
 
-    templates = []
-    for r in rows:
-        templates.append(dict(r))
-
-    return render_template("templates.html", templates=templates)
+    return render_template("templates.html", templates=rows)
 
 
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
+
     if request.method == "POST":
         conn = db()
-        conn.execute(
-            "INSERT INTO templates (name, description, data, author) VALUES (?,?,?,?)",
-            (
-                request.form["name"],
-                request.form["desc"],
-                request.form["data"],
-                current_user.username
-            )
-        )
+        conn.execute("""
+            INSERT INTO templates (name, description, image, link, author)
+            VALUES (?,?,?,?,?)
+        """, (
+            request.form["name"],
+            request.form["desc"],
+            request.form["image"],
+            request.form["link"],
+            current_user.username
+        ))
         conn.commit()
         conn.close()
+
         return redirect("/templates")
 
     return render_template("create_template.html")
@@ -160,54 +158,7 @@ def use_template(template_id):
     return render_template("use_template.html", tpl=tpl)
 
 
-# ================= BOT GENERATOR =================
-@app.route("/bot-generator", methods=["GET", "POST"])
-@login_required
-def bot_generator():
-
-    if current_user.plan != "premium":
-        return redirect("/dashboard")
-
-    if request.method == "POST":
-
-        name = request.form["name"]
-        prefix = request.form["prefix"]
-
-        os.makedirs("generated", exist_ok=True)
-
-        code = f"""
-import discord
-from discord.ext import commands
-
-bot = commands.Bot(command_prefix="{prefix}")
-
-@bot.event
-async def on_ready():
-    print("{name} is ready")
-
-@bot.command()
-async def ping(ctx):
-    await ctx.send("Pong!")
-
-bot.run("TOKEN")
-"""
-
-        path = f"generated/{name}.py"
-
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(code)
-
-        zip_path = f"generated/{name}.zip"
-
-        with zipfile.ZipFile(zip_path, "w") as z:
-            z.write(path, arcname=f"{name}.py")
-
-        return f"Bot generated: {zip_path}"
-
-    return render_template("bot_generator.html")
-
-
-# ================= AUTH =================
+# ---------------- AUTH ----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -231,7 +182,7 @@ def register():
     if request.method == "POST":
         conn = db()
         conn.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
+            "INSERT INTO users (username, password) VALUES (?,?)",
             (request.form["username"], generate_password_hash(request.form["password"]))
         )
         conn.commit()
@@ -249,6 +200,5 @@ def logout():
     return redirect("/login")
 
 
-# ================= RUN =================
 if __name__ == "__main__":
     app.run(debug=True)
