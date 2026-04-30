@@ -20,7 +20,7 @@ body {
     border-radius: 14px;
 }
 
-/* BUTTON BASE */
+/* BUTTON */
 .btn {
     padding: 10px 14px;
     border-radius: 12px;
@@ -32,38 +32,13 @@ body {
     text-decoration: none;
 }
 
-/* GRADIENT BUTTONS */
-.btn.blue {
-    background: linear-gradient(135deg,#3b82f6,#2563eb);
-    color: white;
-}
+.btn.blue { background: linear-gradient(135deg,#3b82f6,#2563eb); color:white; }
+.btn.red { background: linear-gradient(135deg,#ef4444,#dc2626); color:white; }
+.btn.yellow { background: linear-gradient(135deg,#facc15,#f59e0b); color:black; }
 
-.btn.red {
-    background: linear-gradient(135deg,#ef4444,#dc2626);
-    color: white;
-}
-
-.btn.yellow {
-    background: linear-gradient(135deg,#facc15,#f59e0b);
-    color: black;
-}
-
-/* HOVER EFFECTS */
 .btn:hover {
     transform: translateY(-2px) scale(1.03);
     filter: brightness(1.15);
-}
-
-.btn.blue:hover {
-    box-shadow: 0 0 18px rgba(59,130,246,0.6);
-}
-
-.btn.red:hover {
-    box-shadow: 0 0 18px rgba(239,68,68,0.6);
-}
-
-.btn.yellow:hover {
-    box-shadow: 0 0 18px rgba(250,204,21,0.6);
 }
 
 /* SWITCH */
@@ -74,9 +49,7 @@ body {
   height: 26px;
 }
 
-.switch input {
-  display: none;
-}
+.switch input { display: none; }
 
 .slider {
   position: absolute;
@@ -132,8 +105,9 @@ bg-[#0b1220] text-white
         <div class="flex items-center gap-2">
             <i class="fa-solid fa-globe"></i>
             <label class="switch">
-                <input type="checkbox" onclick="location.href='/toggle-lang'"
-                {% if session.get('lang','en')=='ru' %}checked{% endif %}>
+                <input type="checkbox"
+                       onclick="location.href='/toggle-lang'"
+                       {% if session.get('lang','en')=='ru' %}checked{% endif %}>
                 <span class="slider"></span>
             </label>
         </div>
@@ -142,14 +116,15 @@ bg-[#0b1220] text-white
         <div class="flex items-center gap-2">
             <i class="fa-solid fa-moon"></i>
             <label class="switch">
-                <input type="checkbox" onclick="location.href='/toggle-theme'"
-                {% if session.get('theme','dark')=='light' %}checked{% endif %}>
+                <input type="checkbox"
+                       onclick="location.href='/toggle-theme'"
+                       {% if session.get('theme','dark')=='light' %}checked{% endif %}>
                 <span class="slider"></span>
             </label>
         </div>
 
         <!-- USER AREA -->
-        {% if current_user.is_authenticated %}
+        {% if current_user and current_user.is_authenticated %}
 
         <div class="flex items-center gap-3 ml-4">
 
@@ -163,17 +138,21 @@ bg-[#0b1220] text-white
                     <i class="fa-solid fa-crown"></i>
                     Premium
                 </div>
-            {% else %}
-                <a href="/buy-premium" class="btn yellow">
-                    <i class="fa-solid fa-crown"></i>
-                    Buy Premium
-                </a>
             {% endif %}
 
             <a href="/logout" class="btn red">
                 <i class="fa-solid fa-right-from-bracket"></i>
                 Logout
             </a>
+
+        </div>
+
+        {% else %}
+
+        <div class="flex items-center gap-3 ml-4">
+
+            <a href="/login" class="btn blue">Login</a>
+            <a href="/register" class="btn yellow">Sign up</a>
 
         </div>
 
@@ -193,19 +172,19 @@ bg-[#0b1220] text-white
     <div class="max-w-3xl mx-auto space-y-4">
 
         <div>
-            <strong>Политика конфиденциальности / Privacy Policy</strong><br>
-            RU: Мы не продаём и не передаём ваши данные третьим лицам. Используя сайт, вы соглашаетесь на обработку данных для работы сервиса.<br>
-            EN: We do not sell or share your data with third parties. By using this site, you agree to data processing for service operation.
+            <strong>Privacy Policy / Политика конфиденциальности</strong><br>
+            RU: Мы не продаём данные пользователей и используем их только для работы сервиса.<br>
+            EN: We do not sell user data and use it only for service functionality.
         </div>
 
         <div>
-            <strong>Условия использования / Terms of Use</strong><br>
-            RU: Пользователь обязуется не использовать сервис в незаконных целях и соблюдать законы своей страны.<br>
-            EN: The user agrees not to use the service for illegal purposes and to comply with applicable laws.
+            <strong>Terms of Use / Условия использования</strong><br>
+            RU: Запрещено использовать сервис для незаконных действий.<br>
+            EN: It is forbidden to use the service for illegal activities.
         </div>
 
         <div class="text-xs opacity-60 mt-4">
-            © 2026 Discord Tools. All rights reserved.
+            © 2026 Discord Tools
         </div>
 
     </div>
