@@ -46,31 +46,31 @@ body { font-family: sans-serif; }
     <div class="flex items-center gap-4">
 
         <!-- USER SAFE BLOCK -->
-        {% if current_user and current_user.is_authenticated %}
+{% if current_user.is_authenticated %}
 
-        <div class="flex items-center gap-3">
+<div class="flex items-center gap-3">
 
-            <span>
-                <i class="fa-solid fa-user"></i>
-                {{ current_user.username }}
-            </span>
+    <span>
+        <i class="fa-solid fa-user"></i>
+        {{ current_user.username }}
+    </span>
 
-            {% if current_user.plan == "premium" %}
-                <div class="btn yellow">Premium</div>
-            {% endif %}
+    {% if current_user.plan is defined and current_user.plan == "premium" %}
+        <div class="btn yellow">Premium</div>
+    {% endif %}
 
-            <a href="/logout" class="btn red">Logout</a>
+    <a href="/logout" class="btn red">Logout</a>
 
-        </div>
+</div>
 
-        {% else %}
+{% else %}
 
-        <div class="flex gap-2">
-            <a href="/login" class="btn blue">Login</a>
-            <a href="/register" class="btn yellow">Sign up</a>
-        </div>
+<div class="flex gap-2">
+    <a href="/login" class="btn blue">Login</a>
+    <a href="/register" class="btn yellow">Sign up</a>
+</div>
 
-        {% endif %}
+{% endif %}
 
     </div>
 </div>
