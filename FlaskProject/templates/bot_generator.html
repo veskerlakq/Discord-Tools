@@ -2,7 +2,7 @@
 
 {% block content %}
 
-    <a href="/dashboard" class="btn blue mb-4 inline-flex items-center gap-2">
+<a href="/dashboard" class="btn blue mb-4 inline-flex items-center gap-2">
     <i class="fa-solid fa-arrow-left"></i>
     Back
 </a>
@@ -14,13 +14,19 @@
         Bot Generator v2
     </div>
 
+    <p class="text-gray-400 mt-2">
+        Generate a simple Discord bot and download it as ZIP
+    </p>
+
     <form method="POST" class="mt-6 flex flex-col gap-4">
 
-        <input name="name" placeholder="Bot name"
-        class="p-3 rounded bg-black/40 border border-white/10">
+        <input name="name"
+               placeholder="Bot name"
+               class="p-3 rounded bg-black/40 border border-white/10 text-white">
 
-        <input name="prefix" placeholder="Prefix (e.g !)"
-        class="p-3 rounded bg-black/40 border border-white/10">
+        <input name="prefix"
+               placeholder="Prefix (e.g !)"
+               class="p-3 rounded bg-black/40 border border-white/10 text-white">
 
         <button class="btn blue">
             <i class="fa-solid fa-bolt"></i>
