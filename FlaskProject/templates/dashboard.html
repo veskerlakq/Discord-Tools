@@ -2,9 +2,21 @@
 
 {% block content %}
 
-<div class="card">
-    <h1>Dashboard</h1>
-    <p>Welcome {{ current_user.username }}</p>
+<div class="card p-6">
+
+    <h2 class="text-2xl">Dashboard</h2>
+
+    <div class="mt-4 flex items-center gap-4">
+
+        <img src="{{ current_user.avatar }}" width="64" class="rounded-full">
+
+        <div>
+            <div>{{ current_user.username }}</div>
+            <div class="text-gray-400">{{ current_user.plan }}</div>
+        </div>
+
+    </div>
+
 </div>
 
 {% endblock %}
