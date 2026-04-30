@@ -3,27 +3,8 @@
 {% block content %}
 
 <div class="card">
-    <h1>Welcome, {{ current_user.username }}</h1>
-    <p style="opacity:0.7;">SaaS Control Panel v3</p>
-</div>
-
-<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px;">
-
-    <div class="card">
-        <h3>Templates</h3>
-        <p style="opacity:0.7;">Manage your system templates</p>
-    </div>
-
-    <div class="card">
-        <h3>Bot Generator</h3>
-        <p style="opacity:0.7;">Coming soon module</p>
-    </div>
-
-    <div class="card">
-        <h3>Analytics</h3>
-        <p style="opacity:0.7;">User stats & usage</p>
-    </div>
-
+    <h1>Dashboard</h1>
+    <p>Welcome {{ current_user.username }}</p>
 </div>
 
 {% endblock %}
