@@ -54,7 +54,9 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 @app.before_request
-def force_session():
+def fix_session():
+    session.setdefault("theme", "dark")
+    session.setdefault("lang", "en")
     session.permanent = True
 
 class User(UserMixin):
