@@ -8,28 +8,32 @@ def create_template():
             print("=== FORM ===", dict(request.form))
             print("=== FILES ===", request.files)
 
-            name = request.form.get("name")
-            desc = request.form.get("desc")
-            link = request.form.get("link")
+            # SAFE GET (NEVER NONE)
+            name = (request.form.get("name") or "").strip()
+            desc = (request.form.get("desc") or "").strip()
+            link = (request.form.get("link") or "").strip()
+
+            if not name:
+                return "Name is required", 400
 
             file = request.files.get("image")
 
-            print("NAME:", name)
-            print("FILE:", file)
-
             image_path = ""
 
-            if file:
-                print("FILENAME:", file.filename)
-
+            # SAFE FILE HANDLING
             if file and file.filename:
                 filename = secure_filename(file.filename)
+
                 save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
                 print("SAVE PATH:", save_path)
 
                 file.save(save_path)
+
                 image_path = "/static/uploads/" + filename
+
+            # SAFE USER
+            author = getattr(current_user, "username", "unknown")
 
             conn = db()
 
@@ -41,7 +45,7 @@ def create_template():
                 desc,
                 image_path,
                 link,
-                current_user.username
+                author
             ))
 
             conn.commit()
@@ -51,6 +55,7 @@ def create_template():
 
         except Exception as e:
             import traceback
+            print("🔥 CREATE TEMPLATE ERROR:")
             print(traceback.format_exc())
             return f"ERROR: {str(e)}", 500
 
