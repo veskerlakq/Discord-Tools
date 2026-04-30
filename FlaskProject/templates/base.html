@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -9,7 +8,10 @@
 
 <style>
 body {
+    margin: 0;
     font-family: sans-serif;
+    background: #0b1220;
+    color: white;
 }
 
 /* CARD */
@@ -17,6 +19,7 @@ body {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
+    padding: 16px;
 }
 
 /* BUTTON */
@@ -28,50 +31,44 @@ body {
     gap: 8px;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
+    transition: 0.2s ease;
 }
 
-/* COLORS */
 .btn.blue { background:#2563eb; color:white; }
 .btn.red { background:#dc2626; color:white; }
 .btn.yellow { background:#f59e0b; color:black; }
 
-/* HOVER FIX (ВОТ ЭТО ТЕБЕ НЕ РАБОТАЛО) */
 .btn:hover {
     transform: translateY(-2px) scale(1.05);
-    filter: brightness(1.25);
+    filter: brightness(1.2);
 }
 
-/* GLOW */
-.btn.blue:hover {
-    box-shadow: 0 0 15px rgba(37,99,235,0.8);
+/* TOP BAR */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
-.btn.red:hover {
-    box-shadow: 0 0 15px rgba(220,38,38,0.8);
-}
-.btn.yellow:hover {
-    box-shadow: 0 0 15px rgba(245,158,11,0.8);
-}
-
 </style>
 
 </head>
 
-<body class="bg-[#0b1220] text-white">
+<body>
 
 <!-- TOP BAR -->
-<div class="flex justify-between items-center px-6 py-4 border-b border-white/10">
+<div class="topbar">
 
-    <div class="font-bold text-xl">
+    <div style="font-weight: bold; font-size: 18px;">
         Discord Tools
     </div>
 
-    <div class="flex items-center gap-4">
+    <div>
 
         {% if current_user.is_authenticated %}
 
-        <div class="flex items-center gap-3">
+        <div style="display:flex; gap:12px; align-items:center;">
 
             <span>
                 <i class="fa-solid fa-user"></i>
@@ -88,7 +85,7 @@ body {
 
         {% else %}
 
-        <div class="flex gap-2">
+        <div style="display:flex; gap:10px;">
             <a href="/login" class="btn blue">Login</a>
             <a href="/register" class="btn yellow">Sign up</a>
         </div>
@@ -96,9 +93,11 @@ body {
         {% endif %}
 
     </div>
+
 </div>
 
-<div class="p-6">
+<!-- CONTENT (ЭТО ГЛАВНОЕ, ЧТО У ТЕБЯ СЛОМАЛОСЬ) -->
+<div style="padding: 20px; min-height: 80vh;">
     {% block content %}{% endblock %}
 </div>
 
