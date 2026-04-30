@@ -1,17 +1,17 @@
-{% extends "auth_base.html" %}
+{% extends "base.html" %}
 
 {% block content %}
 
-<div class="card p-6 w-96">
+<div class="card p-6">
 
-    <h2 class="text-xl mb-4">Register</h2>
+    <h2>Register</h2>
 
-    <form method="POST" class="flex flex-col gap-3">
+    <form method="POST" style="display:flex; flex-direction:column; gap:10px;">
 
-        <input name="username" placeholder="Username" class="p-2 text-black rounded">
-        <input name="password" type="password" placeholder="Password" class="p-2 text-black rounded">
+        <input name="username" placeholder="username" style="padding:10px; color:black;">
+        <input name="password" type="password" placeholder="password" style="padding:10px; color:black;">
 
-        <button class="btn yellow">Register</button>
+        <button class="btn blue">Create account</button>
 
     </form>
 
