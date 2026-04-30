@@ -2,6 +2,11 @@ import os
 import sqlite3
 import zipfile
 
+def clean_name(name: str) -> str:
+    if not name:
+        return "untitled"
+    return name.replace("-", "_")
+    
 from flask import Flask, render_template, request, redirect, send_file, session
 from flask_login import (
     LoginManager, UserMixin,
