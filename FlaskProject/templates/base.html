@@ -1,74 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+
 body {
     margin:0;
-    font-family:sans-serif;
-    background:#0b1220;
+    font-family: sans-serif;
+    background:#070b14;
     color:white;
 }
 
+/* GLASS CARD */
+.card {
+    background: rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;
+    backdrop-filter: blur(10px);
+    padding:16px;
+}
+
+/* BUTTONS */
 .btn {
     padding:10px 14px;
-    border-radius:10px;
+    border-radius:12px;
     display:inline-flex;
     gap:8px;
     text-decoration:none;
     transition:0.2s;
 }
 
-.btn.blue { background:#2563eb; color:white; }
-.btn.red { background:#dc2626; color:white; }
+.btn.blue { background:#3b82f6; color:white; }
+.btn.red { background:#ef4444; color:white; }
+.btn.green { background:#22c55e; color:white; }
 
-.btn:hover { transform:scale(1.05); }
-
-.topbar {
-    display:flex;
-    justify-content:space-between;
-    padding:16px;
-    border-bottom:1px solid rgba(255,255,255,0.1);
+.btn:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
 }
+
+/* SIDEBAR STYLE */
+.sidebar {
+    width:220px;
+    height:100vh;
+    position:fixed;
+    top:0;
+    left:0;
+    background:#0b1220;
+    border-right:1px solid rgba(255,255,255,0.1);
+    padding:20px;
+}
+
+.main {
+    margin-left:240px;
+    padding:20px;
+}
+
+.link {
+    display:block;
+    padding:10px;
+    border-radius:10px;
+    color:white;
+    text-decoration:none;
+    opacity:0.8;
+}
+
+.link:hover {
+    background:rgba(255,255,255,0.05);
+    opacity:1;
+}
+
 </style>
 
 </head>
 
 <body>
 
-<div class="topbar">
+{% if current_user.is_authenticated %}
 
-    <div><b>SaaS 2.0</b></div>
+<div class="sidebar">
 
-    <div>
+    <h2>SaaS 3.0</h2>
 
-        {% if current_user.is_authenticated %}
+    <a class="link" href="/dashboard">Dashboard</a>
+    <a class="link" href="/templates">Templates</a>
+    <a class="link" href="/create-template">Create</a>
 
-            <span>{{ current_user.username }}</span>
-            <a class="btn blue" href="/dashboard">Dashboard</a>
-            <a class="btn red" href="/logout">Logout</a>
-
-        {% else %}
-
-            <a class="btn blue" href="/login">Login</a>
-            <a class="btn blue" href="/register">Sign up</a>
-
-        {% endif %}
-
+    <div style="margin-top:20px;">
+        <a class="btn red" href="/logout">Logout</a>
     </div>
 
 </div>
 
-<div style="padding:20px;">
+<div class="main">
     {% block content %}{% endblock %}
 </div>
 
-<footer style="margin-top:40px; padding:20px; border-top:1px solid rgba(255,255,255,0.1); font-size:12px; opacity:0.7;">
-    Privacy Policy: We do not store or sell your data. By using this service you agree to basic data processing for authentication.
-</footer>
+{% else %}
+
+<div class="main">
+    {% block content %}{% endblock %}
+</div>
+
+{% endif %}
 
 </body>
 </html>
