@@ -2,6 +2,11 @@ import os
 import sqlite3
 import traceback
 
+print("🔥 APP STARTED")
+print("BASE_DIR:", BASE_DIR)
+print("TEMPLATES:", TEMPLATES_DIR)
+print("FILES:", os.listdir(TEMPLATES_DIR))
+
 from flask import Flask, render_template, request, redirect, session
 from flask_login import (
     LoginManager,
