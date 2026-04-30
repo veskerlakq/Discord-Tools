@@ -39,7 +39,8 @@ def init_db():
     conn.commit()
     conn.close()
 
-init_db()
+with app.app_context():
+    init_db()
 
 # ---------------- LOGIN ----------------
 login_manager = LoginManager()
