@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="card p-6 mb-6">
+    <div class="text-2xl font-bold flex items-center gap-2">
+        <i class="fa-solid fa-chart-line text-green-400"></i>
+        {{ t.dashboard }}
+    </div>
+
+    <div class="text-gray-400 mt-2">
+        {{ t.welcome }}, {{ current_user.username }}
+    </div>
+</div>
+
+<!-- GRID -->
+<div class="grid grid-cols-2 gap-6">
+
+    <!-- BOT GENERATOR -->
+    <div class="card p-6">
+
+        <div class="flex items-center gap-3 text-xl font-bold">
+            <i class="fa-solid fa-robot text-blue-400"></i>
+            {{ t.bot }}
+        </div>
+
+        <p class="text-gray-400 mt-2">
+            Create and configure Discord bot instantly
+        </p>
+
+        {% if current_user.plan == "premium" %}
+        <a href="/bot-generator" class="btn blue mt-4">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Open Generator
+        </a>
+        {% else %}
+        <div class="text-gray-400 mt-4">
+            🔒 Premium required
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- TEMPLATES -->
+    <div class="card p-6">
+
+        <div class="flex items-center gap-3 text-xl font-bold">
+            <i class="fa-solid fa-layer-group text-purple-400"></i>
+            {{ t.templates }}
+        </div>
+
+        <p class="text-gray-400 mt-2">
+            Explore Discord server presets & layouts
+        </p>
+
+        <a href="/templates" class="btn blue mt-4">
+            <i class="fa-solid fa-grid-2"></i>
+            Open Marketplace
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+<div class="flex justify-between items-center mb-6">
+
+    <div class="flex items-center gap-3">
+
+        <h1 class="text-3xl font-bold">Dashboard</h1>
+
+        <div class="text-gray-300">
+            Hello,
+            <span class="font-bold text-white">
+                {{ current_user.username }}
+            </span>
+        </div>
+
+    </div>
+
+    <div class="flex gap-3">
+
+        {% if current_user.plan == "premium" %}
+            <div class="btn yellow">
+                <i class="fa-solid fa-crown"></i>
+                Premium
+            </div>
+        {% else %}
+            <a href="/buy-premium" class="btn yellow">
+                <i class="fa-solid fa-crown"></i>
+                Buy Premium
+            </a>
+        {% endif %}
+
+    </div>
+
+</div>

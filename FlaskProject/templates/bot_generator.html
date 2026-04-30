@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <a href="/dashboard" class="btn blue mb-4 inline-flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i>
+    Back
+</a>
+
+<div class="card p-6">
+
+    <div class="text-2xl font-bold flex items-center gap-2">
+        <i class="fa-solid fa-robot text-blue-400"></i>
+        Bot Generator v2
+    </div>
+
+    <form method="POST" class="mt-6 flex flex-col gap-4">
+
+        <input name="name" placeholder="Bot name"
+        class="p-3 rounded bg-black/40 border border-white/10">
+
+        <input name="prefix" placeholder="Prefix (e.g !)"
+        class="p-3 rounded bg-black/40 border border-white/10">
+
+        <button class="btn blue">
+            <i class="fa-solid fa-bolt"></i>
+            Generate Bot
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

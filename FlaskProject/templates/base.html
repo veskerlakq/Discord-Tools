@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+    transition: 0.3s;
+    font-family: sans-serif;
+}
+
+/* CARD */
+.card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+}
+
+/* BUTTON BASE */
+.btn {
+    padding: 10px 14px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s ease;
+    text-decoration: none;
+}
+
+/* GRADIENT BUTTONS */
+.btn.blue {
+    background: linear-gradient(135deg,#3b82f6,#2563eb);
+    color: white;
+}
+
+.btn.red {
+    background: linear-gradient(135deg,#ef4444,#dc2626);
+    color: white;
+}
+
+.btn.yellow {
+    background: linear-gradient(135deg,#facc15,#f59e0b);
+    color: black;
+}
+
+/* HOVER EFFECTS */
+.btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    filter: brightness(1.15);
+}
+
+.btn.blue:hover {
+    box-shadow: 0 0 18px rgba(59,130,246,0.6);
+}
+
+.btn.red:hover {
+    box-shadow: 0 0 18px rgba(239,68,68,0.6);
+}
+
+.btn.yellow:hover {
+    box-shadow: 0 0 18px rgba(250,204,21,0.6);
+}
+
+/* SWITCH */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #374151;
+  border-radius: 30px;
+  transition: 0.3s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background: linear-gradient(135deg,#3b82f6,#2563eb);
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+</style>
+
+</head>
+
+<body class="
+{% if session.get('theme','dark')=='light' %}
+bg-white text-black
+{% else %}
+bg-[#0b1220] text-white
+{% endif %}
+">
+
+<!-- TOP BAR -->
+<div class="flex justify-between items-center px-6 py-4 border-b border-white/10">
+
+    <div class="font-bold text-xl flex items-center gap-2">
+        <i class="fa-solid fa-cube text-blue-400"></i>
+        My SaaS
+    </div>
+
+    <div class="flex items-center gap-4">
+
+        <!-- LANGUAGE -->
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-globe"></i>
+            <label class="switch">
+                <input type="checkbox" onclick="location.href='/toggle-lang'"
+                {% if session.get('lang','en')=='ru' %}checked{% endif %}>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- THEME -->
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-moon"></i>
+            <label class="switch">
+                <input type="checkbox" onclick="location.href='/toggle-theme'"
+                {% if session.get('theme','dark')=='light' %}checked{% endif %}>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- USER AREA -->
+        {% if current_user.is_authenticated %}
+
+        <div class="flex items-center gap-3 ml-4">
+
+            <!-- USERNAME LEFT -->
+            <span class="text-gray-300">
+                <i class="fa-solid fa-user"></i>
+                {{ current_user.username }}
+            </span>
+
+            <!-- PREMIUM -->
+            {% if current_user.plan == "premium" %}
+                <div class="btn yellow">
+                    <i class="fa-solid fa-crown"></i>
+                    Premium
+                </div>
+            {% else %}
+                <a href="/buy-premium" class="btn yellow">
+                    <i class="fa-solid fa-crown"></i>
+                    Buy Premium
+                </a>
+            {% endif %}
+
+            <!-- LOGOUT -->
+            <a href="/logout" class="btn red">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="p-6">
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

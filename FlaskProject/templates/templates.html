@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <a href="/dashboard" class="btn blue mb-4 inline-flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i>
+    Back
+</a>
+
+<div class="card p-6 mb-6">
+    <div class="text-2xl font-bold flex items-center gap-2">
+        <i class="fa-solid fa-layer-group text-purple-400"></i>
+        Server Templates
+    </div>
+
+    <div class="text-gray-400 mt-2">
+        Choose a ready-made Discord server setup
+    </div>
+</div>
+
+<div class="grid grid-cols-3 gap-6">
+
+    {% for t in templates %}
+
+    <div class="card p-6 hover:scale-105 transition">
+
+        <!-- ICON + NAME -->
+        <div class="text-xl font-bold flex items-center gap-2">
+            <i class="fa-solid {{ t.icon }} text-purple-400"></i>
+            {{ t.name }}
+        </div>
+
+        <!-- DESC -->
+        <p class="text-gray-400 mt-2">
+            {{ t.desc }}
+        </p>
+
+        <!-- BUTTON -->
+        <button class="btn blue mt-4">
+            <i class="fa-solid fa-circle-check"></i>
+            Use Template
+        </button>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}
