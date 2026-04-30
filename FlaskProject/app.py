@@ -7,17 +7,19 @@ import zipfile
 
 app = Flask(__name__)
 
-# 🔥 FIX 1: stable secret key for Render
-app.secret_key = os.environ.get("SECRET_KEY", "change_me_123")
+# ================= CONFIG =================
+app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
 
-# 🔥 FIX 2: absolute DB path (IMPORTANT for Render)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "app.db")
 
 
-# ---------------- DB ----------------
+# ================= DB =================
 def db():
-    return sqlite3.connect(DB)
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    return conn
+
 
 def init_db():
     conn = db()
@@ -45,12 +47,11 @@ def init_db():
     conn.close()
 
 
-# 🔥 FIX 3: ensure DB init safely
 with app.app_context():
     init_db()
 
 
-# ---------------- LOGIN ----------------
+# ================= LOGIN =================
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -69,24 +70,35 @@ def load_user(user_id):
     u = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
     conn.close()
     if u:
-        return User(u[0], u[1], u[3])
+        return User(u["id"], u["username"], u["plan"])
     return None
 
 
-# ---------------- HOME ----------------
+# ================= GLOBALS (FIX t CRASH) =================
+@app.context_processor
+def inject_globals():
+    return dict(
+        t={
+            "dashboard": "Dashboard",
+            "welcome": "Welcome",
+            "bot": "Bot Generator",
+            "templates": "Templates"
+        }
+    )
+
+
+# ================= ROUTES =================
 @app.route("/")
 def home():
     return redirect("/login")
 
 
-# ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
 @login_required
 def dashboard():
     return render_template("dashboard.html")
 
 
-# ---------------- TOGGLES ----------------
 @app.route("/toggle-theme")
 def toggle_theme():
     session["theme"] = "light" if session.get("theme", "dark") == "dark" else "dark"
@@ -99,24 +111,17 @@ def toggle_lang():
     return redirect(request.referrer or "/dashboard")
 
 
-# ---------------- MARKETPLACE ----------------
+# ================= MARKETPLACE =================
 @app.route("/templates")
 @login_required
 def templates():
-
     conn = db()
     rows = conn.execute("SELECT * FROM templates").fetchall()
     conn.close()
 
     templates = []
     for r in rows:
-        templates.append({
-            "id": r[0],
-            "name": r[1],
-            "desc": r[2],
-            "data": r[3],
-            "author": r[4]
-        })
+        templates.append(dict(r))
 
     return render_template("templates.html", templates=templates)
 
@@ -124,21 +129,19 @@ def templates():
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
-
     if request.method == "POST":
-
-        name = request.form["name"]
-        desc = request.form["desc"]
-        data = request.form["data"]
-
         conn = db()
         conn.execute(
             "INSERT INTO templates (name, description, data, author) VALUES (?,?,?,?)",
-            (name, desc, data, current_user.username)
+            (
+                request.form["name"],
+                request.form["desc"],
+                request.form["data"],
+                current_user.username
+            )
         )
         conn.commit()
         conn.close()
-
         return redirect("/templates")
 
     return render_template("create_template.html")
@@ -147,7 +150,6 @@ def create_template():
 @app.route("/use-template/<int:template_id>")
 @login_required
 def use_template(template_id):
-
     conn = db()
     tpl = conn.execute("SELECT * FROM templates WHERE id=?", (template_id,)).fetchone()
     conn.close()
@@ -158,7 +160,7 @@ def use_template(template_id):
     return render_template("use_template.html", tpl=tpl)
 
 
-# ---------------- BOT GENERATOR ----------------
+# ================= BOT GENERATOR =================
 @app.route("/bot-generator", methods=["GET", "POST"])
 @login_required
 def bot_generator():
@@ -205,38 +207,35 @@ bot.run("TOKEN")
     return render_template("bot_generator.html")
 
 
-# ---------------- AUTH ----------------
-@app.route("/login", methods=["GET","POST"])
+# ================= AUTH =================
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        u = request.form["username"]
-        p = request.form["password"]
-
         conn = db()
-        user = conn.execute("SELECT * FROM users WHERE username=?", (u,)).fetchone()
+        user = conn.execute(
+            "SELECT * FROM users WHERE username=?",
+            (request.form["username"],)
+        ).fetchone()
         conn.close()
 
-        if user and check_password_hash(user[2], p):
-            login_user(User(user[0], user[1], user[3]))
+        if user and check_password_hash(user["password"], request.form["password"]):
+            login_user(User(user["id"], user["username"], user["plan"]))
+            session.permanent = True
             return redirect("/dashboard")
 
     return render_template("login.html")
 
 
-@app.route("/register", methods=["GET","POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        u = request.form["username"]
-        p = request.form["password"]
-
         conn = db()
         conn.execute(
-            "INSERT INTO users (username,password) VALUES (?,?)",
-            (u, generate_password_hash(p))
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            (request.form["username"], generate_password_hash(request.form["password"]))
         )
         conn.commit()
         conn.close()
-
         return redirect("/login")
 
     return render_template("register.html")
@@ -250,6 +249,6 @@ def logout():
     return redirect("/login")
 
 
-# ---------------- RUN ----------------
+# ================= RUN =================
 if __name__ == "__main__":
     app.run(debug=True)
