@@ -2,21 +2,35 @@
 
 {% block content %}
 
+<a href="/templates" class="btn blue mb-4 inline-flex items-center gap-2">
+    <i class="fa-solid fa-arrow-left"></i>
+    Back
+</a>
+
 <div class="card p-6">
 
     <h2 class="text-xl font-bold mb-4">Create Template</h2>
 
     <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-3">
 
-        <input name="name" placeholder="Name" class="p-2 rounded text-black">
+        <input name="name"
+               placeholder="Template name"
+               class="p-2 rounded text-black">
 
-        <input name="desc" placeholder="Description" class="p-2 rounded text-black">
+        <textarea name="description"
+                  placeholder="Description"
+                  class="p-2 rounded text-black"></textarea>
 
-        <input type="file" name="image" class="p-2 bg-white text-black rounded">
+        <input type="file"
+               name="image"
+               class="p-2 bg-white text-black rounded">
 
-        <input name="link" placeholder="Template Link" class="p-2 rounded text-black">
+        <input name="link"
+               placeholder="Template link (optional)"
+               class="p-2 rounded text-black">
 
         <button class="btn blue">
+            <i class="fa-solid fa-plus"></i>
             Create Template
         </button>
 
