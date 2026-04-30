@@ -2,62 +2,54 @@
 
 {% block content %}
 
-<!-- HEADER -->
 <div class="card p-6 mb-6">
 
     <div class="text-2xl font-bold flex items-center gap-2">
         <i class="fa-solid fa-chart-line text-green-400"></i>
-        {{ t.dashboard if t else "Dashboard" }}
+        {{ t.dashboard }}
     </div>
 
     <div class="text-gray-400 mt-2">
-        {{ t.welcome if t else "Welcome" }}, {{ current_user.username }}
+        {{ t.welcome }}, {{ current_user.username if current_user.is_authenticated else "Guest" }}
     </div>
 
 </div>
 
-<!-- GRID -->
 <div class="grid grid-cols-2 gap-6">
 
-    <!-- BOT GENERATOR -->
     <div class="card p-6">
 
         <div class="flex items-center gap-3 text-xl font-bold">
             <i class="fa-solid fa-robot text-blue-400"></i>
-            {{ t.bot if t else "Bot Generator" }}
+            {{ t.bot }}
         </div>
 
         <p class="text-gray-400 mt-2">
             Create and configure Discord bot instantly
         </p>
 
-        {% if current_user.plan == "premium" %}
+        {% if current_user.is_authenticated and current_user.plan == "premium" %}
         <a href="/bot-generator" class="btn blue mt-4">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
             Open Generator
         </a>
         {% else %}
-        <div class="text-gray-400 mt-4">
-            🔒 Premium required
-        </div>
+        <div class="text-gray-400 mt-4">🔒 Premium required</div>
         {% endif %}
 
     </div>
 
-    <!-- TEMPLATES -->
     <div class="card p-6">
 
         <div class="flex items-center gap-3 text-xl font-bold">
             <i class="fa-solid fa-layer-group text-purple-400"></i>
-            {{ t.templates if t else "Templates" }}
+            {{ t.templates }}
         </div>
 
         <p class="text-gray-400 mt-2">
-            Explore Discord server presets & layouts
+            Explore server templates
         </p>
 
         <a href="/templates" class="btn blue mt-4">
-            <i class="fa-solid fa-table-cells"></i>
             Open Marketplace
         </a>
 
