@@ -79,7 +79,6 @@ def load_user(user_id):
     except:
         return None
 
-
 # ================= SAFE HOME =================
 @app.route("/")
 def home():
