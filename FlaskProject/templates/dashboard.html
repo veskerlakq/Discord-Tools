@@ -4,14 +4,16 @@
 
 <!-- HEADER -->
 <div class="card p-6 mb-6">
+
     <div class="text-2xl font-bold flex items-center gap-2">
         <i class="fa-solid fa-chart-line text-green-400"></i>
-        {{ t.dashboard }}
+        {{ t.dashboard if t else "Dashboard" }}
     </div>
 
     <div class="text-gray-400 mt-2">
-        {{ t.welcome }}, {{ current_user.username }}
+        {{ t.welcome if t else "Welcome" }}, {{ current_user.username }}
     </div>
+
 </div>
 
 <!-- GRID -->
@@ -22,7 +24,7 @@
 
         <div class="flex items-center gap-3 text-xl font-bold">
             <i class="fa-solid fa-robot text-blue-400"></i>
-            {{ t.bot }}
+            {{ t.bot if t else "Bot Generator" }}
         </div>
 
         <p class="text-gray-400 mt-2">
@@ -47,7 +49,7 @@
 
         <div class="flex items-center gap-3 text-xl font-bold">
             <i class="fa-solid fa-layer-group text-purple-400"></i>
-            {{ t.templates }}
+            {{ t.templates if t else "Templates" }}
         </div>
 
         <p class="text-gray-400 mt-2">
@@ -55,7 +57,7 @@
         </p>
 
         <a href="/templates" class="btn blue mt-4">
-            <i class="fa-solid fa-grid-2"></i>
+            <i class="fa-solid fa-table-cells"></i>
             Open Marketplace
         </a>
 
