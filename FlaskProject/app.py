@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import sqlite3
 import os
 
@@ -10,6 +11,11 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "app.db")
+
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 # ---------------- DB ----------------
@@ -73,43 +79,6 @@ def load_user(user_id):
     return None
 
 
-# ---------------- GLOBALS ----------------
-@app.context_processor
-def inject_globals():
-    return dict(
-        t={
-            "dashboard": "Dashboard",
-            "welcome": "Welcome",
-            "bot": "Bot Generator",
-            "templates": "Templates"
-        }
-    )
-
-
-# ---------------- ROUTES ----------------
-@app.route("/")
-def home():
-    return redirect("/login")
-
-
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    return render_template("dashboard.html")
-
-
-@app.route("/toggle-theme")
-def toggle_theme():
-    session["theme"] = "light" if session.get("theme", "dark") == "dark" else "dark"
-    return redirect(request.referrer or "/dashboard")
-
-
-@app.route("/toggle-lang")
-def toggle_lang():
-    session["lang"] = "ru" if session.get("lang", "en") == "en" else "en"
-    return redirect(request.referrer or "/dashboard")
-
-
 # ---------------- TEMPLATES ----------------
 @app.route("/templates")
 @login_required
@@ -121,27 +90,38 @@ def templates():
     return render_template("templates.html", templates=rows)
 
 
+# ---------------- CREATE TEMPLATE (UPLOAD FIX) ----------------
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
 
     if request.method == "POST":
 
-        # 🔥 SAFE GET (fix 400 Bad Request)
-        name = request.form.get("name", "").strip()
-        desc = request.form.get("desc", "").strip()
-        image = request.form.get("image", "").strip()
-        link = request.form.get("link", "").strip()
+        name = request.form.get("name", "")
+        desc = request.form.get("desc", "")
+        link = request.form.get("link", "")
 
-        if not name:
-            return "Name is required", 400
+        file = request.files.get("image")
+
+        image_path = ""
+
+        if file and file.filename != "":
+            filename = secure_filename(file.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            file.save(save_path)
+
+            image_path = "/static/uploads/" + filename
 
         conn = db()
         conn.execute("""
             INSERT INTO templates (name, description, image, link, author)
             VALUES (?,?,?,?,?)
         """, (
-            name, desc, image, link, current_user.username
+            name,
+            desc,
+            image_path,
+            link,
+            current_user.username
         ))
         conn.commit()
         conn.close()
@@ -149,65 +129,3 @@ def create_template():
         return redirect("/templates")
 
     return render_template("create_template.html")
-
-
-@app.route("/use-template/<int:template_id>")
-@login_required
-def use_template(template_id):
-    conn = db()
-    tpl = conn.execute("SELECT * FROM templates WHERE id=?", (template_id,)).fetchone()
-    conn.close()
-
-    if not tpl:
-        return "Template not found"
-
-    return render_template("use_template.html", tpl=tpl)
-
-
-# ---------------- AUTH ----------------
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        conn = db()
-        user = conn.execute(
-            "SELECT * FROM users WHERE username=?",
-            (request.form.get("username"),)
-        ).fetchone()
-        conn.close()
-
-        if user and check_password_hash(user["password"], request.form.get("password")):
-            login_user(User(user["id"], user["username"], user["plan"]))
-            session.permanent = True
-            return redirect("/dashboard")
-
-    return render_template("login.html")
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        conn = db()
-        conn.execute(
-            "INSERT INTO users (username, password) VALUES (?,?)",
-            (
-                request.form.get("username"),
-                generate_password_hash(request.form.get("password"))
-            )
-        )
-        conn.commit()
-        conn.close()
-        return redirect("/login")
-
-    return render_template("register.html")
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    session.clear()
-    return redirect("/login")
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
