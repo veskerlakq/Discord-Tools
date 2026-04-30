@@ -2,8 +2,20 @@
 
 {% block content %}
 
-<a href="/dashboard" class="btn blue mb-4">← Back</a>
+<!-- HEADER ACTIONS -->
+<div class="flex items-center justify-between mb-4">
 
+    <a href="/dashboard" class="btn blue">
+        ← Back
+    </a>
+
+    <a href="/create-template" class="btn blue">
+        + Create Template
+    </a>
+
+</div>
+
+<!-- GRID -->
 <div class="grid grid-cols-3 gap-6">
 
 {% for t in templates %}
