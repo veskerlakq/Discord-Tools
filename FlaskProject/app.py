@@ -1,3 +1,7 @@
+import os
+import sqlite3
+import traceback
+
 from flask import Flask, render_template, request, redirect, session
 from flask_login import (
     LoginManager,
@@ -9,33 +13,48 @@ from flask_login import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-import sqlite3
-import os
-import traceback
 
-app = Flask(__name__)
 
-# ---------------- CONFIG ----------------
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
+# =========================
+# PATH FIX (IMPORTANT FOR RENDER)
+# =========================
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+UPLOAD_FOLDER = os.path.join(STATIC_DIR, "uploads")
 
-# FIXED DB PATH (Render safe)
-DB = os.path.join(BASE_DIR, "app.db")
-
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-# ---------------- GLOBAL ERROR ----------------
+# =========================
+# APP INIT
+# =========================
+app = Flask(
+    __name__,
+    template_folder=TEMPLATES_DIR,
+    static_folder=STATIC_DIR
+)
+
+app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
+
+
+# =========================
+# ERROR DEBUG (IMPORTANT)
+# =========================
 @app.errorhandler(Exception)
 def handle_error(e):
-    print("🔥 GLOBAL ERROR:")
+    print("🔥 ERROR TRACE:")
     print(traceback.format_exc())
     return f"SERVER ERROR: {str(e)}", 500
 
 
-# ---------------- DB ----------------
+# =========================
+# DB
+# =========================
+DB = os.path.join(BASE_DIR, "app.db")
+
+
 def db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -73,7 +92,9 @@ with app.app_context():
     init_db()
 
 
-# ---------------- LOGIN ----------------
+# =========================
+# LOGIN SYSTEM
+# =========================
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -97,7 +118,9 @@ def load_user(user_id):
     return None
 
 
-# ---------------- ROUTES ----------------
+# =========================
+# ROUTES
+# =========================
 @app.route("/")
 def home():
     return redirect("/login")
@@ -115,17 +138,22 @@ def toggle_theme():
     return redirect(request.referrer or "/dashboard")
 
 
-# ---------------- TEMPLATES ----------------
+# =========================
+# TEMPLATES MARKET
+# =========================
 @app.route("/templates")
 @login_required
 def templates():
     conn = db()
     rows = conn.execute("SELECT * FROM templates").fetchall()
     conn.close()
+
     return render_template("templates.html", templates=rows)
 
 
-# ---------------- CREATE TEMPLATE ----------------
+# =========================
+# CREATE TEMPLATE (FIXED 100%)
+# =========================
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
 def create_template():
@@ -133,12 +161,12 @@ def create_template():
     if request.method == "POST":
 
         try:
-            name = request.form.get("name", "").strip()
-            desc = request.form.get("desc", "").strip()
-            link = request.form.get("link", "").strip()
+            name = (request.form.get("name") or "").strip()
+            desc = (request.form.get("desc") or "").strip()
+            link = (request.form.get("link") or "").strip()
 
             if not name:
-                return "Name required", 400
+                return "Name is required", 400
 
             file = request.files.get("image")
 
@@ -146,9 +174,13 @@ def create_template():
 
             if file and file.filename:
                 filename = secure_filename(file.filename)
+
                 save_path = os.path.join(UPLOAD_FOLDER, filename)
                 file.save(save_path)
+
                 image_path = "/static/uploads/" + filename
+
+            author = getattr(current_user, "username", "unknown")
 
             conn = db()
             conn.execute("""
@@ -159,8 +191,9 @@ def create_template():
                 desc,
                 image_path,
                 link,
-                current_user.username
+                author
             ))
+
             conn.commit()
             conn.close()
 
@@ -168,12 +201,14 @@ def create_template():
 
         except Exception:
             print(traceback.format_exc())
-            return "CREATE TEMPLATE ERROR (check logs)", 500
+            return "CREATE TEMPLATE ERROR", 500
 
     return render_template("create-template.html")
 
 
-# ---------------- USE TEMPLATE ----------------
+# =========================
+# USE TEMPLATE
+# =========================
 @app.route("/use-template/<int:template_id>")
 @login_required
 def use_template(template_id):
@@ -191,7 +226,9 @@ def use_template(template_id):
     return render_template("use_template.html", tpl=tpl)
 
 
-# ---------------- AUTH ----------------
+# =========================
+# AUTH
+# =========================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -238,6 +275,8 @@ def logout():
     return redirect("/login")
 
 
-# ---------------- RUN ----------------
+# =========================
+# RUN
+# =========================
 if __name__ == "__main__":
     app.run(debug=True)
