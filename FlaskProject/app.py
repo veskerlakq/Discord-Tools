@@ -73,7 +73,7 @@ def load_user(user_id):
     return None
 
 
-# ---------------- GLOBAL UI TEXT ----------------
+# ---------------- GLOBALS ----------------
 @app.context_processor
 def inject_globals():
     return dict(
@@ -110,7 +110,7 @@ def toggle_lang():
     return redirect(request.referrer or "/dashboard")
 
 
-# ---------------- TEMPLATES MARKET ----------------
+# ---------------- TEMPLATES ----------------
 @app.route("/templates")
 @login_required
 def templates():
@@ -126,16 +126,22 @@ def templates():
 def create_template():
 
     if request.method == "POST":
+
+        # 🔥 SAFE GET (fix 400 Bad Request)
+        name = request.form.get("name", "").strip()
+        desc = request.form.get("desc", "").strip()
+        image = request.form.get("image", "").strip()
+        link = request.form.get("link", "").strip()
+
+        if not name:
+            return "Name is required", 400
+
         conn = db()
         conn.execute("""
             INSERT INTO templates (name, description, image, link, author)
             VALUES (?,?,?,?,?)
         """, (
-            request.form["name"],
-            request.form["desc"],
-            request.form["image"],
-            request.form["link"],
-            current_user.username
+            name, desc, image, link, current_user.username
         ))
         conn.commit()
         conn.close()
@@ -165,11 +171,11 @@ def login():
         conn = db()
         user = conn.execute(
             "SELECT * FROM users WHERE username=?",
-            (request.form["username"],)
+            (request.form.get("username"),)
         ).fetchone()
         conn.close()
 
-        if user and check_password_hash(user["password"], request.form["password"]):
+        if user and check_password_hash(user["password"], request.form.get("password")):
             login_user(User(user["id"], user["username"], user["plan"]))
             session.permanent = True
             return redirect("/dashboard")
@@ -183,7 +189,10 @@ def register():
         conn = db()
         conn.execute(
             "INSERT INTO users (username, password) VALUES (?,?)",
-            (request.form["username"], generate_password_hash(request.form["password"]))
+            (
+                request.form.get("username"),
+                generate_password_hash(request.form.get("password"))
+            )
         )
         conn.commit()
         conn.close()
