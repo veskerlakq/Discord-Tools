@@ -42,20 +42,31 @@ body { background:#050816; color:white; margin:0; }
 
 {% if current_user.is_authenticated %}
 
+<!-- SIDEBAR -->
 <div class="sidebar">
-<h2>SaaS 5.0</h2>
+    <h2>SaaS 5.0</h2>
 
-<a href="/dashboard">Dashboard</a><br>
-<a href="/templates">Templates</a><br>
-<a href="/bot-generator">Bot Generator</a><br>
-<a href="/create-template">Create</a><br><br>
+    <a href="/dashboard">Dashboard</a><br>
+    <a href="/templates">Templates</a><br>
+    <a href="/bot-generator">Bot Generator</a><br>
+    <a href="/create-template">Create</a><br><br>
 
-<a href="/logout">Logout</a>
+    <a href="/logout">Logout</a>
 </div>
 
+<!-- MAIN -->
 <div class="main">
     {% block content %}{% endblock %}
 </div>
+
+{% else %}
+
+<!-- GUEST VIEW -->
+<div class="main">
+    {% block content %}{% endblock %}
+</div>
+
+{% endif %}
 
 </body>
 </html>
