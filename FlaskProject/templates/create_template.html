@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-6 max-w-lg mx-auto">
+
+    <h1 class="text-2xl font-bold mb-4">Create Template</h1>
+
+    <form method="POST">
+
+        <input name="name" placeholder="Template name"
+        class="w-full p-2 mb-3 text-black rounded">
+
+        <input name="desc" placeholder="Description"
+        class="w-full p-2 mb-3 text-black rounded">
+
+        <textarea name="data" placeholder="JSON structure (channels/roles)"
+        class="w-full p-2 mb-3 text-black rounded"></textarea>
+
+        <button class="btn blue w-full">
+            Create
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}
