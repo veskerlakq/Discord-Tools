@@ -6,51 +6,15 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+body { margin:0; font-family:sans-serif; background:#0b1220; color:white; }
 
-body {
-    margin:0;
-    font-family: sans-serif;
-    background:#070b14;
-    color:white;
-}
-
-/* GLASS CARD */
-.card {
-    background: rgba(255,255,255,0.05);
-    border:1px solid rgba(255,255,255,0.08);
-    border-radius:16px;
-    backdrop-filter: blur(10px);
-    padding:16px;
-}
-
-/* BUTTONS */
-.btn {
-    padding:10px 14px;
-    border-radius:12px;
-    display:inline-flex;
-    gap:8px;
-    text-decoration:none;
-    transition:0.2s;
-}
-
-.btn.blue { background:#3b82f6; color:white; }
-.btn.red { background:#ef4444; color:white; }
-.btn.green { background:#22c55e; color:white; }
-
-.btn:hover {
-    transform: scale(1.05);
-    filter: brightness(1.2);
-}
-
-/* SIDEBAR STYLE */
 .sidebar {
     width:220px;
     height:100vh;
     position:fixed;
-    top:0;
     left:0;
-    background:#0b1220;
-    border-right:1px solid rgba(255,255,255,0.1);
+    top:0;
+    background:#0a0f1a;
     padding:20px;
 }
 
@@ -59,20 +23,12 @@ body {
     padding:20px;
 }
 
-.link {
-    display:block;
-    padding:10px;
-    border-radius:10px;
-    color:white;
-    text-decoration:none;
-    opacity:0.8;
-}
-
-.link:hover {
+.card {
     background:rgba(255,255,255,0.05);
-    opacity:1;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:16px;
 }
-
 </style>
 
 </head>
@@ -82,17 +38,13 @@ body {
 {% if current_user.is_authenticated %}
 
 <div class="sidebar">
+    <h2>SaaS 3.1</h2>
 
-    <h2>SaaS 3.0</h2>
+    <a href="/dashboard">Dashboard</a><br>
+    <a href="/templates">Templates</a><br>
+    <a href="/create-template">Create</a><br><br>
 
-    <a class="link" href="/dashboard">Dashboard</a>
-    <a class="link" href="/templates">Templates</a>
-    <a class="link" href="/create-template">Create</a>
-
-    <div style="margin-top:20px;">
-        <a class="btn red" href="/logout">Logout</a>
-    </div>
-
+    <a href="/logout">Logout</a>
 </div>
 
 <div class="main">
