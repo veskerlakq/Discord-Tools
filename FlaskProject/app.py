@@ -65,7 +65,7 @@ def load_user(user_id):
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
-    return redirect("/dashboard")
+    return redirect("/login")
 
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
