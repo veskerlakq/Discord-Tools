@@ -71,12 +71,22 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    conn = db()
-    u = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
-    conn.close()
-    if u:
-        return User(u["id"], u["username"], u["plan"])
-    return None
+    try:
+        conn = db()
+        user = conn.execute(
+            "SELECT * FROM users WHERE id=?",
+            (user_id,)
+        ).fetchone()
+        conn.close()
+
+        if user:
+            return User(user["id"], user["username"], user["plan"])
+
+        return None
+
+    except Exception as e:
+        print("USER LOAD ERROR:", e)
+        return None
 
 
 # ---------------- ROUTES ----------------
@@ -114,9 +124,9 @@ def create_template():
 
     if request.method == "POST":
 
-        name = request.form.get("name", "")
-        desc = request.form.get("desc", "")
-        link = request.form.get("link", "")
+        name = request.form.get("name")
+        desc = request.form.get("desc")
+        link = request.form.get("link")
 
         file = request.files.get("image")
 
@@ -161,8 +171,6 @@ def use_template(template_id):
 
     if not tpl:
         return "Template not found", 404
-
-    tpl = dict(tpl)
 
     return render_template("use_template.html", tpl=tpl)
 
