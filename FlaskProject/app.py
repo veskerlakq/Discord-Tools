@@ -9,14 +9,10 @@ from flask_login import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ================= APP =================
 app = Flask(__name__)
 
-# 🔥 СТАБИЛЬНЫЙ KEY (НЕ МЕНЯЕТСЯ НА RENDER)
-app.secret_key = os.environ.get("SECRET_KEY", "super_ultra_dev_key_123")
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = False  # Render = True если HTTPS
+# ================= CONFIG =================
+app.secret_key = os.environ.get("SECRET_KEY", "dev_key_123")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "app.db")
@@ -48,16 +44,11 @@ def init_db():
 init_db()
 
 
-# ================= LOGIN SAFE =================
+# ================= LOGIN =================
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-@app.before_request
-def fix_session():
-    session.setdefault("theme", "dark")
-    session.setdefault("lang", "en")
-    session.permanent = True
 
 class User(UserMixin):
     def __init__(self, id, username, plan):
@@ -68,25 +59,21 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
-    try:
-        conn = db()
-        u = conn.execute(
-            "SELECT * FROM users WHERE id=?",
-            (user_id,)
-        ).fetchone()
-        conn.close()
+    conn = db()
+    u = conn.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+    conn.close()
 
-        if not u:
-            return None
-
+    if u:
         return User(u["id"], u["username"], u["plan"])
+    return None
 
-    except:
-        return None
 
-# ================= SAFE HOME =================
+# ================= ROUTES =================
+
 @app.route("/")
 def home():
+    if current_user.is_authenticated:
+        return redirect("/dashboard")
     return redirect("/login")
 
 
@@ -97,8 +84,13 @@ def dashboard():
 
 
 # ================= AUTH =================
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
+
+    if current_user.is_authenticated:
+        return redirect("/dashboard")
+
     if request.method == "POST":
 
         conn = db()
@@ -109,12 +101,7 @@ def login():
         conn.close()
 
         if user and check_password_hash(user["password"], request.form["password"]):
-
-            login_user(
-                User(user["id"], user["username"], user["plan"]),
-                remember=True   # 🔥 ВОТ ЭТО ГЛАВНОЕ
-            )
-
+            login_user(User(user["id"], user["username"], user["plan"]), remember=True)
             return redirect("/dashboard")
 
     return render_template("login.html")
@@ -122,13 +109,16 @@ def login():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+
     if request.method == "POST":
 
         conn = db()
         conn.execute(
             "INSERT INTO users (username, password) VALUES (?,?)",
-            (request.form["username"],
-             generate_password_hash(request.form["password"]))
+            (
+                request.form["username"],
+                generate_password_hash(request.form["password"])
+            )
         )
         conn.commit()
         conn.close()
@@ -144,14 +134,6 @@ def logout():
     logout_user()
     session.clear()
     return redirect("/login")
-
-
-# ================= ERROR CATCH (ANTI-500) =================
-@app.errorhandler(Exception)
-def error(e):
-    import traceback
-    print(traceback.format_exc())
-    return f"ERROR: {str(e)}", 500
 
 
 # ================= RUN =================
