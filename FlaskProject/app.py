@@ -6,9 +6,14 @@ import os
 import zipfile
 
 app = Flask(__name__)
-app.secret_key = "change_me_123"
 
-DB = "app.db"
+# 🔥 FIX 1: stable secret key for Render
+app.secret_key = os.environ.get("SECRET_KEY", "change_me_123")
+
+# 🔥 FIX 2: absolute DB path (IMPORTANT for Render)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB = os.path.join(BASE_DIR, "app.db")
+
 
 # ---------------- DB ----------------
 def db():
@@ -39,19 +44,24 @@ def init_db():
     conn.commit()
     conn.close()
 
+
+# 🔥 FIX 3: ensure DB init safely
 with app.app_context():
     init_db()
+
 
 # ---------------- LOGIN ----------------
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+
 class User(UserMixin):
     def __init__(self, id, username, plan):
         self.id = str(id)
         self.username = username
         self.plan = plan
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -62,10 +72,12 @@ def load_user(user_id):
         return User(u[0], u[1], u[3])
     return None
 
+
 # ---------------- HOME ----------------
 @app.route("/")
 def home():
     return redirect("/login")
+
 
 # ---------------- DASHBOARD ----------------
 @app.route("/dashboard")
@@ -73,16 +85,19 @@ def home():
 def dashboard():
     return render_template("dashboard.html")
 
+
 # ---------------- TOGGLES ----------------
 @app.route("/toggle-theme")
 def toggle_theme():
     session["theme"] = "light" if session.get("theme", "dark") == "dark" else "dark"
     return redirect(request.referrer or "/dashboard")
 
+
 @app.route("/toggle-lang")
 def toggle_lang():
     session["lang"] = "ru" if session.get("lang", "en") == "en" else "en"
     return redirect(request.referrer or "/dashboard")
+
 
 # ---------------- MARKETPLACE ----------------
 @app.route("/templates")
@@ -104,6 +119,7 @@ def templates():
         })
 
     return render_template("templates.html", templates=templates)
+
 
 @app.route("/create-template", methods=["GET", "POST"])
 @login_required
@@ -127,6 +143,7 @@ def create_template():
 
     return render_template("create_template.html")
 
+
 @app.route("/use-template/<int:template_id>")
 @login_required
 def use_template(template_id):
@@ -139,6 +156,7 @@ def use_template(template_id):
         return "Template not found"
 
     return render_template("use_template.html", tpl=tpl)
+
 
 # ---------------- BOT GENERATOR ----------------
 @app.route("/bot-generator", methods=["GET", "POST"])
@@ -186,6 +204,7 @@ bot.run("TOKEN")
 
     return render_template("bot_generator.html")
 
+
 # ---------------- AUTH ----------------
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -202,6 +221,7 @@ def login():
             return redirect("/dashboard")
 
     return render_template("login.html")
+
 
 @app.route("/register", methods=["GET","POST"])
 def register():
@@ -221,12 +241,14 @@ def register():
 
     return render_template("register.html")
 
+
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     session.clear()
     return redirect("/login")
+
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
