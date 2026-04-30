@@ -11,7 +11,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # ================= APP =================
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
+
+# 🔥 СТАБИЛЬНЫЙ KEY (НЕ МЕНЯЕТСЯ НА RENDER)
+app.secret_key = os.environ.get("SECRET_KEY", "super_ultra_dev_key_123")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = False  # Render = True если HTTPS
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB = os.path.join(BASE_DIR, "app.db")
